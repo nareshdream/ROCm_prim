@@ -173,6 +173,7 @@ namespace detail
     /// developers that know what they are doing.
     ROCPRIM_DEVICE ROCPRIM_INLINE void atomic_fence_acquire_order_only()
     {
+        __builtin_amdgcn_s_waitcnt(0);
         __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "workgroup");
     }
 }
