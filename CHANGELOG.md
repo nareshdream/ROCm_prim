@@ -9,9 +9,11 @@ Documentation for rocPRIM is available at
 ### Added
 
 * Added the parallel `find_first_of` device function with autotuned configurations, this function is similar to `std::find_first_of`, it searches for the first occurrence of any of the provided elements.
+* Added --emulation/-e option in rtest.py to run tests in rtest.xml file. E.g python3 rtest.py --emulation=smoke
 
 ### Changed
   * Modified smoke tests to complete in faster run-time and to never exceed 2GB of vram usage
+
 
 ### Resolved issues
 
