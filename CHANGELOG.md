@@ -13,6 +13,7 @@ Documentation for rocPRIM is available at
 
 ### Changed
   * Modified smoke tests to complete in faster run-time and to never exceed 2GB of vram usage
+  * Old smoke tests can be ran with python3 rtest.py --test/-t smoke_old or python3 rtest.py --emulation/-e smoke_old instead
 
 
 ### Resolved issues
