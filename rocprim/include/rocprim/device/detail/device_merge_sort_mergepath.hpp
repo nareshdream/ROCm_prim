@@ -137,7 +137,8 @@ namespace detail
         {
             return;
         }
-        const bool IsIncompleteTile = flat_block_id == (input_size / items_per_tile);
+
+        const bool is_incomplete_tile = flat_block_id == (input_size / items_per_tile);
 
         const OffsetT partition_beg = merge_partitions[flat_block_id];
         const OffsetT partition_end = merge_partitions[flat_block_id + 1];
@@ -146,8 +147,11 @@ namespace detail
         const unsigned int target_merged_tiles_number = merged_tiles_number * 2;
         const unsigned int mask  = target_merged_tiles_number - 1;
         const unsigned int tilegroup_start_id  = ~mask & flat_block_id;
-        const OffsetT tilegroup_start = static_cast<OffsetT>(tilegroup_start_id) * items_per_tile; // Tile-group starts here
+
+        const OffsetT tilegroup_start
+            = static_cast<OffsetT>(tilegroup_start_id) * items_per_tile; // Tile-group starts here
         const OffsetT diag = static_cast<OffsetT>(flat_block_id) * items_per_tile - tilegroup_start;
+
 
         const OffsetT keys1_beg = partition_beg;
         OffsetT keys1_end = partition_end;
@@ -170,7 +174,7 @@ namespace detail
                                     keys_input + keys2_beg,
                                     num_keys1,
                                     num_keys2,
-                                    IsIncompleteTile);
+                                    is_incomplete_tile);
         // Load keys into shared memory
         reg_to_shared<BlockSize, ItemsPerThread>(keys_shared, keys);
 
@@ -181,7 +185,7 @@ namespace detail
                                         values_input + keys2_beg,
                                         num_keys1,
                                         num_keys2,
-                                        IsIncompleteTile);
+                                        is_incomplete_tile);
         }
         rocprim::syncthreads();
 
@@ -221,10 +225,10 @@ namespace detail
             rocprim::syncthreads();
         }
 
-        const OffsetT offset = flat_block_id * items_per_tile;
+        const OffsetT offset = static_cast<OffsetT>(flat_block_id) * items_per_tile;
         block_store().store(offset,
                             input_size - offset,
-                            IsIncompleteTile,
+                            is_incomplete_tile,
                             keys_output,
                             values_output,
                             keys,
@@ -281,13 +285,14 @@ namespace detail
         auto& values_shared = storage.values.get();
 
         const unsigned short flat_id            = block_thread_id<0>();
-        const unsigned int   flat_block_id      = block_id<0>();
+        const unsigned int flat_block_id = ::rocprim::flat_block_id();
         if(flat_block_id >= num_blocks)
         {
             return;
         }
 
         const bool is_incomplete_tile = flat_block_id == (input_size / items_per_tile);
+
         const OffsetT partition_beg = merge_partitions[flat_block_id];
         const OffsetT partition_end = merge_partitions[flat_block_id + 1];
 
@@ -295,8 +300,10 @@ namespace detail
         const unsigned int target_merged_tiles_number = merged_tiles_number * 2;
         const unsigned int mask  = target_merged_tiles_number - 1;
         const unsigned int tilegroup_start_id  = ~mask & flat_block_id;
-        const OffsetT tilegroup_start = static_cast<OffsetT>(tilegroup_start_id) * items_per_tile; // Tile-group starts here
+        const OffsetT tilegroup_start
+            = static_cast<OffsetT>(tilegroup_start_id) * items_per_tile; // Tile-group starts here
         const OffsetT diag = static_cast<OffsetT>(flat_block_id) * items_per_tile - tilegroup_start;
+
 
         const OffsetT keys1_beg = partition_beg;
         OffsetT keys1_end = partition_end;
@@ -385,7 +392,7 @@ namespace detail
             }
 
             rocprim::syncthreads();
-            const OffsetT thread_offset = static_cast<OffsetT>(flat_block_id) * items_per_tile + flat_id * ItemsPerThread;
+            const OffsetT thread_offset = items_per_tile * static_cast<OffsetT>(flat_block_id) + ItemsPerThread * flat_id;
             if(is_incomplete_tile)
             {
                 ROCPRIM_UNROLL
