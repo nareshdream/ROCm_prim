@@ -52,59 +52,43 @@ class block_radix_rank_match
     static constexpr unsigned int block_size   = BlockSizeX * BlockSizeY * BlockSizeZ;
     static constexpr unsigned int radix_digits = 1 << RadixBits;
 
-    /// \brief Emulate the LDS usage for a set number of warps.
-    ///
-    /// \warning This function behaves differently between device and host due to device
-    /// specifications not being available on host!
-    ROCPRIM_HOST_DEVICE
-    static constexpr unsigned int emulate_lds_usage(unsigned int warps)
+    struct unpadded_config {
+        static constexpr unsigned int warps = ::rocprim::detail::ceiling_div(block_size, device_warp_size());
+    };
+
+    struct padded_config {
+        static constexpr unsigned int warps = unpadded_config::warps | 1u;
+    };
+
+    template<typename Config>
+    struct build_config : Config
     {
-        const unsigned int active_counters = warps * radix_digits;
-        const unsigned int counters_per_thread
+        static constexpr unsigned int  active_counters = Config::warps * radix_digits;
+        static constexpr unsigned int  counters_per_thread
             = ::rocprim::detail::ceiling_div(active_counters, block_size);
-        const unsigned int counters = counters_per_thread * block_size;
-        const size_t       lds_size = max(sizeof(digit_counter_type) * counters,
-                                    sizeof(typename block_scan_type::storage_type));
-        return lds_size;
-    }
+        static constexpr unsigned int counters  = counters_per_thread * block_size;
 
-    /// \brief Get the number of warps for this algorithm.
-    ///
-    /// Using an even number of warps may increase LDS bank conflicts. However padding the number
-    /// warps increases LDS usage. This can cause a lower occupancy when the available LDS before
-    /// padding is a multiple of the required LDS.  Higher occupancy is preferred to hide latency
-    /// as opposed to decreasaing bank conflicts. But, if the occupancy between padded and non-
-    /// padded is the the same, we can pad for free!
-    ///
-    /// \warning This function behaves differently between device and host due to device
-    /// specifications not being available on host!
-    ROCPRIM_HOST_DEVICE
-    static constexpr unsigned int get_num_warps()
-    {
-        const unsigned int warps = ::rocprim::detail::ceiling_div(block_size, device_warp_size());
-        const unsigned int padded_warps = warps | 1u;
+        // Compute local data share and theorethical occupancy
+        static constexpr size_t       lds_size  = max(sizeof(digit_counter_type) * counters,
+                                               sizeof(typename block_scan_type::storage_type));
+        static constexpr unsigned int occupancy = detail::get_min_lds_size() / lds_size;
 
-        // LDS available on this architecture.
-        const unsigned int available_lds = detail::get_min_lds_size();
+        // score is requried for 'select_max_by_score_t'
+        static constexpr unsigned int score = occupancy;
+    };
 
-        // Check occupancy limited by LDS.
-        const unsigned int occupancy        = available_lds / emulate_lds_usage(warps);
-        const unsigned int padded_occupancy = available_lds / emulate_lds_usage(padded_warps);
+    using config
+        = detail::select_max_by_score_t<build_config<padded_config>, build_config<unpadded_config>>;
 
-        // Check if we can pad without hurting occupancy.
-        return padded_occupancy >= occupancy ? padded_warps : warps;
-    }
-
-    static constexpr unsigned int warps = get_num_warps();
+    static constexpr unsigned int warps = config::warps;
     // The number of counters that are actively being used.
-    static constexpr unsigned int active_counters = warps * radix_digits;
+    static constexpr unsigned int active_counters = config::active_counters;
     // We want to use a regular block scan to scan the per-warp counters. This requires the
     // total number of counters to be divisible by the block size. To facilitate this, just add
     // a bunch of counters that are not otherwise used.
-    static constexpr unsigned int counters_per_thread
-        = ::rocprim::detail::ceiling_div(active_counters, block_size);
+    static constexpr unsigned int counters_per_thread = config::counters_per_thread;
     // The total number of counters, factoring in the unused ones for the block scan.
-    static constexpr unsigned int counters = counters_per_thread * block_size;
+    static constexpr unsigned int counters = config::counters;
 
 public:
     constexpr static unsigned int digits_per_thread

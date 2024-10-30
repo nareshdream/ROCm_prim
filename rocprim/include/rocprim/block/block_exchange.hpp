@@ -86,21 +86,44 @@ class block_exchange
     static constexpr unsigned int warp_size =
         detail::get_min_warp_size(BlockSize, ::rocprim::device_warp_size());
     // Number of warps in block
-    static constexpr unsigned int warps_no = (BlockSize + warp_size - 1) / warp_size;
-
-    // Minimize LDS bank conflicts for power-of-two strides, i.e. when items accessed
-    // using `thread_id * ItemsPerThread` pattern where ItemsPerThread is power of two
-    // (all exchanges from/to blocked).
-    static constexpr bool has_bank_conflicts
-        = ItemsPerThread >= 2 && ::rocprim::detail::is_power_of_two(ItemsPerThread);
+    static constexpr unsigned int warps_no = ::rocprim::detail::ceiling_div(BlockSize, warp_size);
     static constexpr unsigned int banks_no = ::rocprim::detail::get_lds_banks_no();
     static constexpr unsigned int buffer_size
         = static_cast<unsigned int>(rocprim::max(size_t{1}, size_t{4} / sizeof(T)));
-    static constexpr unsigned int bank_conflicts_padding
-        = has_bank_conflicts ? (BlockSize * ItemsPerThread / banks_no) : 0;
 
-    static constexpr unsigned int storage_count
-        = BlockSize * ItemsPerThread + bank_conflicts_padding;
+    struct unpadded_config {
+        static constexpr bool         has_bank_conflicts = false;
+        static constexpr unsigned int padding            = 0;
+    };
+
+    struct padded_config
+    {
+        // Minimize LDS bank conflicts for power-of-two strides, i.e. when items accessed
+        // using `thread_id * ItemsPerThread` pattern where ItemsPerThread is power of two
+        // (all exchanges from/to blocked).
+        static constexpr bool has_bank_conflicts
+            = ItemsPerThread >= 2 && ::rocprim::detail::is_power_of_two(ItemsPerThread);
+        static constexpr unsigned int padding
+            = has_bank_conflicts ? (BlockSize * ItemsPerThread / banks_no) : 0;
+    };
+
+    template<typename Config>
+    struct build_config : Config
+    {
+        static constexpr unsigned int storage_count = BlockSize * ItemsPerThread + Config::padding;
+        static constexpr unsigned int storage_size  = sizeof(T) * storage_count;
+        static constexpr unsigned int occupancy     = detail::get_min_lds_size() / storage_size;
+
+        // score is requried for 'select_max_by_score_t'
+        static constexpr unsigned int score = occupancy;
+    };
+
+    using config
+        = detail::select_max_by_score_t<build_config<padded_config>, build_config<unpadded_config>>;
+
+    static constexpr bool         has_bank_conflicts     = config::has_bank_conflicts;
+    static constexpr unsigned int bank_conflicts_padding = config::padding;
+    static constexpr unsigned int storage_count          = config::storage_count;
 
     struct storage_type_
     {

@@ -420,6 +420,21 @@ ROCPRIM_HOST_DEVICE auto bit_cast(const Source& source)
 #endif
 }
 
+template<typename... Ts>
+struct select_max_by_score;
+
+template<typename T>
+struct select_max_by_score<T> { using type = T; };
+
+template<typename T, typename U, typename... Vs>
+struct select_max_by_score<T, U, Vs...> {
+    using tail = typename select_max_by_score<U, Vs...>::type;
+    using type = std::conditional_t<(T::score >= tail::score), T, tail>;
+};
+
+template<typename... Ts>
+using select_max_by_score_t = typename select_max_by_score<Ts...>::type;
+
 } // end namespace detail
 END_ROCPRIM_NAMESPACE
 
