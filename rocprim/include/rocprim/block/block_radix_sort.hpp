@@ -124,6 +124,8 @@ class block_radix_sort
                   "multiple of the warp size");
 #endif
 
+    static constexpr bool is_key_and_value_aligned = alignof(Key) == alignof(Value) && sizeof(Key) == sizeof(Value);
+
     using block_rank_type = ::rocprim::
         block_radix_rank<BlockSizeX, RadixBitsPerPass, RadixRankAlgorithm, BlockSizeY, BlockSizeZ>;
     using keys_exchange_type
@@ -1048,11 +1050,19 @@ private:
                                  std::false_type)
     {
         keys_exchange_type().blocked_to_warp_striped(keys, keys, storage.get().keys_exchange);
-        ::rocprim::syncthreads();
+        if ROCPRIM_IF_CONSTEXPR(is_key_and_value_aligned)
+        {
+            // If keys and values are aligned, then the LDS for both exchanges is
+            // local per wave. We can relax the data depedency!
+            ::rocprim::wave_barrier();
+        }
+        else
+        {
+            ::rocprim::syncthreads();
+        }
         values_exchange_type().blocked_to_warp_striped(values,
                                                        values,
                                                        storage.get().values_exchange);
-        ::rocprim::syncthreads();
     }
 
     template<class SortedValue>
@@ -1093,6 +1103,9 @@ private:
                                     values,
                                     storage,
                                     std::integral_constant<bool, use_warp_exchange>{});
+            // Storage has been dirtied. 'rank_keys' does not always align nicely with this
+            // so a full block synchronization is needed.
+            ::rocprim::syncthreads();
         }
 
         ROCPRIM_UNROLL
