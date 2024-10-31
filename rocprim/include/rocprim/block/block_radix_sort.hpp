@@ -1092,6 +1092,14 @@ private:
     {
         using key_codec = ::rocprim::radix_key_codec<Key, Descending>;
 
+        // 'rank_keys' may be invoked multiple times. We encode the key once and move the
+        // encoded during the majority of sort to save on some compute.
+        ROCPRIM_UNROLL
+        for(unsigned int i = 0; i < ItemsPerThread; i++)
+        {
+            key_codec::encode_inplace(keys[i], decomposer);
+        }
+
         // If we're using warp striped radix rank but our input is in a blocked layout, we
         // can emulate the correct input through an exchange to a warp striped layout.
         if ROCPRIM_IF_CONSTEXPR(TryEmulateWarpStriped && warp_striped && ItemsPerThread > 1)
@@ -1106,12 +1114,6 @@ private:
             // Storage has been dirtied. 'rank_keys' does not always align nicely with this
             // so a full block synchronization is needed.
             ::rocprim::syncthreads();
-        }
-
-        ROCPRIM_UNROLL
-        for(unsigned int i = 0; i < ItemsPerThread; i++)
-        {
-            key_codec::encode_inplace(keys[i], decomposer);
         }
 
         unsigned int ranks[ItemsPerThread];
@@ -1158,6 +1160,7 @@ private:
             exchange_values(storage, values, ranks);
         }
 
+        // Done with 'rank_keys' so we can decode back to the original key.
         ROCPRIM_UNROLL
         for(unsigned int i = 0; i < ItemsPerThread; i++)
         {
