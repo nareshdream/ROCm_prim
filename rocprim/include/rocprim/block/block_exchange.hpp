@@ -621,6 +621,38 @@ public:
         }
     }
 
+    /// \brief Scatters items to a *warp* striped arrangement based on their ranks
+    /// across the thread block, using temporary storage.
+    ///
+    /// \tparam U - [inferred] the output type.
+    /// \tparam Offset - [inferred] the rank type.
+    ///
+    /// \param [in] input - array that data is loaded from.
+    /// \param [out] output - array that data is loaded to.
+    /// \param [out] ranks - array that has rank of data.
+    /// \param [in] storage - reference to a temporary storage object of type storage_type.
+    ///
+    /// \par Storage reusage
+    /// Synchronization barrier should be placed before \p storage is reused
+    /// or repurposed: \p __syncthreads() or \p rocprim::syncthreads().
+    ///
+    /// \par Example.
+    /// \code{.cpp}
+    /// __global__ void example_kernel(...)
+    /// {
+    ///     // specialize block_exchange for int, block of 128 threads and 8 items per thread
+    ///     using block_exchange_int = rocprim::block_exchange<int, 128, 8>;
+    ///     // allocate storage in shared memory
+    ///     __shared__ block_exchange_int::storage_type storage;
+    ///
+    ///     int items[8];
+    ///     int ranks[8];
+    ///     ...
+    ///     block_exchange_int b_exchange;
+    ///     b_exchange.scatter_to_warp_striped(items, items, ranks, storage);
+    ///     ...
+    /// }
+    /// \endcode
     template<unsigned int WarpSize = device_warp_size(), class U, class Offset>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void scatter_to_warp_striped(const T (&input)[ItemsPerThread],
