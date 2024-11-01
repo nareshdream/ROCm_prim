@@ -139,7 +139,7 @@ private:
             digit_counters[i] = &get_digit_counter(digit, warp_id, storage);
 
             // Read the prefix sum of that digit. We already know it's 0 on the first iteration. So
-            // we can skip a read-after-write depedency. The conditional gets optimized out due to
+            // we can skip a read-after-write dependency. The conditional gets optimized out due to
             // loop unrolling.
             const digit_counter_type warp_digit_prefix
                 = i == 0 ? digit_counter_type(0) : *digit_counters[i];

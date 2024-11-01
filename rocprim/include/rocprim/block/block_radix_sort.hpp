@@ -1039,7 +1039,7 @@ private:
         if ROCPRIM_IF_CONSTEXPR(is_key_and_value_aligned)
         {
             // If keys and values are aligned, then the LDS for both exchanges is
-            // local per wave. We can relax the data depedency!
+            // local per wave. We can relax the data dependency!
             ::rocprim::wave_barrier();
         }
         else
