@@ -894,6 +894,10 @@ public:
         sort_desc_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs ascending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_warp_striped_to_striped(
@@ -911,6 +915,10 @@ public:
         sort_impl<false, true, false>(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs ascending radix sort over key-value pairs in a *warp-striped order*
+    ///
+    /// \see block_radix_sort::sort_to_striped
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_warp_striped_to_striped(
@@ -928,6 +936,10 @@ public:
         sort_warp_striped_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs ascending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
@@ -944,6 +956,10 @@ public:
         sort_impl<false, true, false>(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs ascending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
@@ -959,6 +975,10 @@ public:
         sort_warp_striped_to_striped(keys, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs descending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_desc_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_desc_warp_striped_to_striped(
@@ -976,6 +996,10 @@ public:
         sort_impl<true, true, false>(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs descending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_desc_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_desc_warp_striped_to_striped(
@@ -993,6 +1017,10 @@ public:
         sort_desc_warp_striped_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs descending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_desc_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_desc_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
@@ -1009,6 +1037,10 @@ public:
         sort_impl<true, true, false>(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
+    /// \brief Performs descending radix sort over key-value pairs in a *warp-striped order*
+    /// partitioned across threads in a block, results are saved in a striped arrangement.
+    ///
+    /// \see block_radix_sort::sort_desc_to_striped
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void sort_desc_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
