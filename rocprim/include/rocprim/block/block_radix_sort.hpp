@@ -1056,7 +1056,7 @@ private:
     ROCPRIM_DEVICE ROCPRIM_INLINE
     void blocked_to_warp_striped(Key (&keys)[ItemsPerThread],
                                  SortedValue (&values)[ItemsPerThread],
-                                 storage_type& storage,
+                                 storage_type& /* storage */,
                                  std::true_type)
     {
         ::rocprim::warp_exchange<Key, ItemsPerThread>{}.blocked_to_striped_shuffle(keys, keys);
