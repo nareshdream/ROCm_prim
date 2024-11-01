@@ -262,26 +262,26 @@ struct radix_sort_single_helper
         value_type values[ItemsPerThread];
         if(!is_incomplete_block)
         {
-            block_load_direct_blocked(flat_id, keys_input + block_offset, keys);
+            block_load_direct_warp_striped(flat_id, keys_input + block_offset, keys);
             if ROCPRIM_IF_CONSTEXPR(with_values)
             {
-                block_load_direct_blocked(flat_id, values_input + block_offset, values);
+                block_load_direct_warp_striped(flat_id, values_input + block_offset, values);
             }
         }
         else
         {
             const key_type out_of_bounds = key_codec::get_out_of_bounds_key(decomposer);
-            block_load_direct_blocked(flat_id,
-                                      keys_input + block_offset,
-                                      keys,
-                                      valid_in_last_block,
-                                      out_of_bounds);
+            block_load_direct_warp_striped(flat_id,
+                                           keys_input + block_offset,
+                                           keys,
+                                           valid_in_last_block,
+                                           out_of_bounds);
             if ROCPRIM_IF_CONSTEXPR(with_values)
             {
-                block_load_direct_blocked(flat_id,
-                                          values_input + block_offset,
-                                          values,
-                                          valid_in_last_block);
+                block_load_direct_warp_striped(flat_id,
+                                               values_input + block_offset,
+                                               values,
+                                               valid_in_last_block);
             }
         }
 
