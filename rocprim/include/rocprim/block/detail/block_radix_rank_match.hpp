@@ -52,21 +52,24 @@ class block_radix_rank_match
     static constexpr unsigned int block_size   = BlockSizeX * BlockSizeY * BlockSizeZ;
     static constexpr unsigned int radix_digits = 1 << RadixBits;
 
-    struct unpadded_config {
-        static constexpr unsigned int warps = ::rocprim::detail::ceiling_div(block_size, device_warp_size());
+    struct unpadded_config
+    {
+        static constexpr unsigned int warps
+            = ::rocprim::detail::ceiling_div(block_size, device_warp_size());
     };
 
-    struct padded_config {
+    struct padded_config
+    {
         static constexpr unsigned int warps = unpadded_config::warps | 1u;
     };
 
     template<typename Config>
     struct build_config : Config
     {
-        static constexpr unsigned int  active_counters = Config::warps * radix_digits;
-        static constexpr unsigned int  counters_per_thread
+        static constexpr unsigned int active_counters = Config::warps * radix_digits;
+        static constexpr unsigned int counters_per_thread
             = ::rocprim::detail::ceiling_div(active_counters, block_size);
-        static constexpr unsigned int counters  = counters_per_thread * block_size;
+        static constexpr unsigned int counters = counters_per_thread * block_size;
 
         // Compute local data share and theorethical occupancy
         static constexpr size_t       lds_size  = max(sizeof(digit_counter_type) * counters,

@@ -91,7 +91,8 @@ class block_exchange
     static constexpr unsigned int buffer_size
         = static_cast<unsigned int>(rocprim::max(size_t{1}, size_t{4} / sizeof(T)));
 
-    struct unpadded_config {
+    struct unpadded_config
+    {
         static constexpr bool         has_bank_conflicts = false;
         static constexpr unsigned int padding            = 0;
     };

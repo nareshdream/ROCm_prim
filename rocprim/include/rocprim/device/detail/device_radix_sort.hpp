@@ -65,7 +65,12 @@ void sort_warp_striped_to_striped(SortType sorter,
 {
     if ROCPRIM_IF_CONSTEXPR(Descending)
     {
-        sorter.sort_desc_warp_striped_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
+        sorter.sort_desc_warp_striped_to_striped(keys,
+                                                 values,
+                                                 storage,
+                                                 begin_bit,
+                                                 end_bit,
+                                                 decomposer);
     }
     else
     {
@@ -294,21 +299,23 @@ struct radix_sort_single_helper
             block_store_direct_striped<BlockSize>(flat_id, keys_output + block_offset, keys);
             if ROCPRIM_IF_CONSTEXPR(with_values)
             {
-                block_store_direct_striped<BlockSize>(flat_id, values_output + block_offset, values);
+                block_store_direct_striped<BlockSize>(flat_id,
+                                                      values_output + block_offset,
+                                                      values);
             }
         }
         else
         {
             block_store_direct_striped<BlockSize>(flat_id,
-                                       keys_output + block_offset,
-                                       keys,
-                                       valid_in_last_block);
+                                                  keys_output + block_offset,
+                                                  keys,
+                                                  valid_in_last_block);
             if ROCPRIM_IF_CONSTEXPR(with_values)
             {
                 block_store_direct_striped<BlockSize>(flat_id,
-                                           values_output + block_offset,
-                                           values,
-                                           valid_in_last_block);
+                                                      values_output + block_offset,
+                                                      values,
+                                                      valid_in_last_block);
             }
         }
     }

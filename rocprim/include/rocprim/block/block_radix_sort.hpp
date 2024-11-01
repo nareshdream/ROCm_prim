@@ -31,9 +31,9 @@
 #include "../type_traits"
 #include "../types.hpp"
 
+#include "../warp/warp_exchange.hpp"
 #include "block_exchange.hpp"
 #include "block_radix_rank.hpp"
-#include "../warp/warp_exchange.hpp"
 
 /// \addtogroup blockmodule
 /// @{
@@ -124,7 +124,8 @@ class block_radix_sort
                   "multiple of the warp size");
 #endif
 
-    static constexpr bool is_key_and_value_aligned = alignof(Key) == alignof(Value) && sizeof(Key) == sizeof(Value);
+    static constexpr bool is_key_and_value_aligned
+        = alignof(Key) == alignof(Value) && sizeof(Key) == sizeof(Value);
 
     using block_rank_type = ::rocprim::
         block_radix_rank<BlockSizeX, RadixBitsPerPass, RadixRankAlgorithm, BlockSizeY, BlockSizeZ>;
@@ -237,8 +238,7 @@ public:
                                                   unsigned int end_bit    = 8 * sizeof(Key),
                                                   Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort(keys, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -323,8 +323,7 @@ public:
                                                        unsigned int end_bit    = 8 * sizeof(Key),
                                                        Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc(keys, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -423,8 +422,7 @@ public:
              unsigned int end_bit    = 8 * sizeof(Key),
              Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -523,8 +521,7 @@ public:
                   unsigned int end_bit    = 8 * sizeof(Key),
                   Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -611,8 +608,7 @@ public:
                                                              unsigned int end_bit = 8 * sizeof(Key),
                                                              Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_to_striped(keys, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -700,8 +696,7 @@ public:
                                                                   = 8 * sizeof(Key),
                                                                   Decomposer decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc_to_striped(keys, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -798,8 +793,7 @@ public:
                         unsigned int end_bit    = 8 * sizeof(Key),
                         Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -897,8 +891,7 @@ public:
         unsigned int end_bit    = 8 * sizeof(Key),
         Decomposer   decomposer = {})
     {
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -924,9 +917,9 @@ public:
     void sort_warp_striped_to_striped(
         Key (&keys)[ItemsPerThread],
         typename std::enable_if<WithValues, Value>::type (&values)[ItemsPerThread],
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+        unsigned int begin_bit  = 0,
+        unsigned int end_bit    = 8 * sizeof(Key),
+        Decomposer   decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
@@ -938,12 +931,11 @@ public:
 
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
-    void sort_warp_striped_to_striped(
-        Key (&keys)[ItemsPerThread],
-        storage_type& storage,
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+    void sort_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
+                                      storage_type& storage,
+                                      unsigned int  begin_bit  = 0,
+                                      unsigned int  end_bit    = 8 * sizeof(Key),
+                                      Decomposer    decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
@@ -955,18 +947,16 @@ public:
 
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
-    void sort_warp_striped_to_striped(
-        Key (&keys)[ItemsPerThread],
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+    void sort_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
+                                      unsigned int begin_bit  = 0,
+                                      unsigned int end_bit    = 8 * sizeof(Key),
+                                      Decomposer   decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
                       "'block_radix_rank_algorithm::match'.");
 
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_warp_striped_to_striped(keys, storage, begin_bit, end_bit, decomposer);
     }
 
@@ -992,27 +982,25 @@ public:
     void sort_desc_warp_striped_to_striped(
         Key (&keys)[ItemsPerThread],
         typename std::enable_if<WithValues, Value>::type (&values)[ItemsPerThread],
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+        unsigned int begin_bit  = 0,
+        unsigned int end_bit    = 8 * sizeof(Key),
+        Decomposer   decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
                       "'block_radix_rank_algorithm::match'.");
 
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc_warp_striped_to_striped(keys, values, storage, begin_bit, end_bit, decomposer);
     }
 
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
-    void sort_desc_warp_striped_to_striped(
-        Key (&keys)[ItemsPerThread],
-        storage_type& storage,
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+    void sort_desc_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
+                                           storage_type& storage,
+                                           unsigned int  begin_bit  = 0,
+                                           unsigned int  end_bit    = 8 * sizeof(Key),
+                                           Decomposer    decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
@@ -1024,23 +1012,22 @@ public:
 
     template<bool WithValues = with_values, class Decomposer = ::rocprim::identity_decomposer>
     ROCPRIM_DEVICE ROCPRIM_INLINE
-    void sort_desc_warp_striped_to_striped(
-        Key (&keys)[ItemsPerThread],
-        unsigned int  begin_bit  = 0,
-        unsigned int  end_bit    = 8 * sizeof(Key),
-        Decomposer    decomposer = {})
+    void sort_desc_warp_striped_to_striped(Key (&keys)[ItemsPerThread],
+                                           unsigned int begin_bit  = 0,
+                                           unsigned int end_bit    = 8 * sizeof(Key),
+                                           Decomposer   decomposer = {})
     {
         static_assert(warp_striped,
                       "'sort_warp_striped_to_striped' can only be used with "
                       "'block_radix_rank_algorithm::match'.");
 
-        ROCPRIM_SHARED_MEMORY
-        storage_type storage;
+        ROCPRIM_SHARED_MEMORY storage_type storage;
         sort_desc_warp_striped_to_striped(keys, storage, begin_bit, end_bit, decomposer);
     }
 
 private:
-    static constexpr bool use_warp_exchange = device_warp_size() % ItemsPerThread == 0 && ItemsPerThread <= 4;
+    static constexpr bool use_warp_exchange
+        = device_warp_size() % ItemsPerThread == 0 && ItemsPerThread <= 4;
 
     template<class SortedValue>
     ROCPRIM_DEVICE ROCPRIM_INLINE

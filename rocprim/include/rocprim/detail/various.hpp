@@ -424,10 +424,14 @@ template<typename... Ts>
 struct select_max_by_score;
 
 template<typename T>
-struct select_max_by_score<T> { using type = T; };
+struct select_max_by_score<T>
+{
+    using type = T;
+};
 
 template<typename T, typename U, typename... Vs>
-struct select_max_by_score<T, U, Vs...> {
+struct select_max_by_score<T, U, Vs...>
+{
     using tail = typename select_max_by_score<U, Vs...>::type;
     using type = std::conditional_t<(T::score >= tail::score), T, tail>;
 };
