@@ -35,7 +35,7 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 * Modified the input size in device adjacent difference benchmarks. Observed performance with these benchmarks might be different.
 * Changed the default seed for `device_benchmark_segmented_reduce`.
-* Changed `test_utils_hipgraphs.hpp` to be a class `graphHelper` with internal graph and graph instances
+* Changed `test_utils_hipgraphs.hpp` to be a class `GraphHelper` with internal graph and graph instances
 
 ### Removed
 
