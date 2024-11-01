@@ -197,6 +197,9 @@ hipError_t reduce_impl(void * temporary_storage,
         std::cout << "items_per_block " << items_per_block << '\n';
     }
 
+    // We increase the items per thread with a maximum of 16.
+    // This means if the number_of_blocks is larger than 16 it
+    // will not fit in one kernel.
     if(number_of_blocks > 16)
     {
         const auto aligned_size_limit = number_of_blocks_limit * items_per_block;
@@ -242,11 +245,16 @@ hipError_t reduce_impl(void * temporary_storage,
     }
     else
     {
+        // Modify the items per thread to both better utilise the available
+        // compute units and avoid launching more kernels than necessary.
+        // That is, if we can double the items per thread to prevent an extra
+        // kernel launch, we should probably do that.
         const unsigned int too_large = size > 0 ? items_per_block / size : 0;
         const unsigned int too_small = number_of_blocks;
 
         if(too_small > 1)
         {
+            // Decrease IPT for better utilisation
             if(too_small <= 2)
             {
                 SINGLE_REDUCE_KERNEL(true, 2);
@@ -266,6 +274,7 @@ hipError_t reduce_impl(void * temporary_storage,
         }
         else
         {
+            // Increase IPT to prevent kernel launch
             if(too_large >= 16)
             {
                 SINGLE_REDUCE_KERNEL(false, 16);
