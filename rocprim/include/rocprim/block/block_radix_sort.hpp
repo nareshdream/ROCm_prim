@@ -28,7 +28,6 @@
 #include "../functional.hpp"
 #include "../intrinsics/thread.hpp"
 #include "../thread/radix_key_codec.hpp"
-#include "../type_traits"
 #include "../types.hpp"
 
 #include "../warp/warp_exchange.hpp"
