@@ -75,7 +75,7 @@ void block_reduce_kernel(InputIterator  input,
         std::cout << name << "(" << size << ")"; \
         auto _error = hipStreamSynchronize(stream); \
         if(_error != hipSuccess) return _error; \
-        auto _end = std::chrono::high_resolution_clock::now(); \
+        auto _end = std::chrono::steady_clock::now(); \
         auto _d = std::chrono::duration_cast<std::chrono::duration<double>>(_end - start); \
         std::cout << " " << _d.count() * 1000 << " ms" << '\n'; \
     }
@@ -89,11 +89,22 @@ void block_reduce_kernel(InputIterator  input,
             std::cout << name << "(" << size << ")"; \
             auto __error = hipStreamSynchronize(stream); \
             if(__error != hipSuccess) return __error; \
-            auto _end = std::chrono::high_resolution_clock::now(); \
+            auto _end = std::chrono::steady_clock::now(); \
             auto _d = std::chrono::duration_cast<std::chrono::duration<double>>(_end - start); \
             std::cout << " " << _d.count() * 1000 << " ms" << '\n'; \
         } \
     }
+
+#define ROCPRIM_RETURN_ON_ERROR(...)      \
+    do                                    \
+    {                                     \
+        hipError_t error = (__VA_ARGS__); \
+        if(error != hipSuccess)           \
+        {                                 \
+            return error;                 \
+        }                                 \
+    }                                     \
+    while(0)
 
 #define SINGLE_REDUCE_KERNEL(fit_larger, fit_items)                                       \
     do                                                                                    \
@@ -184,7 +195,7 @@ hipError_t reduce_impl(void * temporary_storage,
     }
 
     // Start point for time measurements
-    std::chrono::high_resolution_clock::time_point start;
+    std::chrono::steady_clock::time_point start;
 
     const auto size_limit             = params.reduce_config.size_limit;
     const auto number_of_blocks_limit = ::rocprim::max<size_t>(size_limit / items_per_block, 1);
@@ -302,6 +313,7 @@ hipError_t reduce_impl(void * temporary_storage,
 }
 
 #undef SINGLE_REDUCE_KERNEL
+#undef ROCPRIM_RETURN_ON_ERROR
 #undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
 #undef ROCPRIM_DETAIL_HIP_SYNC
 
