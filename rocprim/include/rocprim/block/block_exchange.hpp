@@ -34,6 +34,19 @@
 
 BEGIN_ROCPRIM_NAMESPACE
 
+/// \brief Available padding options for \p block_exchange .
+enum block_exchange_padding_mode
+{
+    /// Use padding to avoid bank conflicts when applicable.
+    use_padding = 0,
+
+    /// Never use padding.
+    no_padding = 1,
+
+    /// Only use padding when there is no cost to occupancy.
+    max_occupancy = 2,
+};
+
 /// \brief The \p block_exchange class is a block level parallel primitive which provides
 /// methods for rearranging items partitioned across threads in a block.
 ///
@@ -77,7 +90,8 @@ template<
     unsigned int BlockSizeX,
     unsigned int ItemsPerThread,
     unsigned int BlockSizeY = 1,
-    unsigned int BlockSizeZ = 1
+    unsigned int BlockSizeZ = 1,
+    block_exchange_padding_mode PaddingMode = block_exchange_padding_mode::use_padding
 >
 class block_exchange
 {
@@ -119,8 +133,13 @@ class block_exchange
         static constexpr unsigned int score = occupancy;
     };
 
-    using config
-        = detail::select_max_by_score_t<build_config<padded_config>, build_config<unpadded_config>>;
+    using config = std::conditional_t<
+        PaddingMode == block_exchange_padding_mode::use_padding,
+        build_config<padded_config>,
+        std::conditional_t<PaddingMode == block_exchange_padding_mode::no_padding,
+                           build_config<unpadded_config>,
+                           detail::select_max_by_score_t<build_config<padded_config>,
+                                                         build_config<unpadded_config>>>>;
 
     static constexpr bool         has_bank_conflicts     = config::has_bank_conflicts;
     static constexpr unsigned int bank_conflicts_padding = config::padding;

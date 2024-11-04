@@ -129,9 +129,9 @@ class block_radix_sort
     using block_rank_type = ::rocprim::
         block_radix_rank<BlockSizeX, RadixBitsPerPass, RadixRankAlgorithm, BlockSizeY, BlockSizeZ>;
     using keys_exchange_type
-        = ::rocprim::block_exchange<Key, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ>;
+        = ::rocprim::block_exchange<Key, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, block_exchange_padding_mode::max_occupancy>;
     using values_exchange_type
-        = ::rocprim::block_exchange<Value, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ>;
+        = ::rocprim::block_exchange<Value, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, block_exchange_padding_mode::max_occupancy>;
 
     // Struct used for creating a raw_storage object for this primitive's temporary storage.
     union storage_type_
