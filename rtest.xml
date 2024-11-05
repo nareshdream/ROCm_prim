@@ -20,4 +20,7 @@
 <test sets="smoke_old">
   <run name="smoke_tests_old">{SMOKE_TEST_OLD}</run>
 </test>
+<test sets="regression">
+  <run name="regression_tests">{REGRESSION_TEST}</run>
+</test>
 </testset>
