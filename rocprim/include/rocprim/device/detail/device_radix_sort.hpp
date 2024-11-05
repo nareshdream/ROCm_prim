@@ -157,9 +157,16 @@ struct radix_digit_count_helper
         const unsigned int flat_id = ::rocprim::detail::block_thread_id<0>();
         const unsigned int stripe  = flat_id % atomic_stripes;
 
-        for(unsigned int i = flat_id; i < counters; i += BlockSize)
+        constexpr bool block_size_divides_counters_nicely = counters % BlockSize == 0;
+
+        ROCPRIM_UNROLL
+        for(unsigned int i = 0; i < counters; i += BlockSize)
         {
-            storage.digit_counters[i] = 0;
+            const unsigned int offset = i + flat_id;
+            if(block_size_divides_counters_nicely || offset < counters)
+            {
+                storage.digit_counters[offset] = 0;
+            }
         }
 
         ::rocprim::syncthreads();
