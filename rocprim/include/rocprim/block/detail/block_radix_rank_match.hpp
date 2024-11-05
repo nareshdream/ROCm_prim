@@ -29,16 +29,18 @@
 #include "../../thread/radix_key_codec.hpp"
 
 #include "../block_scan.hpp"
+#include "../config.hpp"
 
 BEGIN_ROCPRIM_NAMESPACE
 
 namespace detail
 {
 
-template<unsigned int BlockSizeX,
-         unsigned int RadixBits,
-         unsigned int BlockSizeY = 1,
-         unsigned int BlockSizeZ = 1>
+template<unsigned int       BlockSizeX,
+         unsigned int       RadixBits,
+         unsigned int       BlockSizeY  = 1,
+         unsigned int       BlockSizeZ  = 1,
+         block_padding_hint PaddingHint = block_padding_hint::avoid_conflicts>
 class block_radix_rank_match
 {
     using digit_counter_type = unsigned int;
@@ -75,13 +77,11 @@ class block_radix_rank_match
         static constexpr size_t       lds_size  = max(sizeof(digit_counter_type) * counters,
                                                sizeof(typename block_scan_type::storage_type));
         static constexpr unsigned int occupancy = detail::get_min_lds_size() / lds_size;
-
-        // score is requried for 'select_max_by_score_t'
-        static constexpr unsigned int score = occupancy;
     };
 
-    using config
-        = detail::select_max_by_score_t<build_config<padded_config>, build_config<unpadded_config>>;
+    using config = detail::select_block_padding_config<PaddingHint,
+                                                       build_config<padded_config>,
+                                                       build_config<unpadded_config>>;
 
     static constexpr unsigned int warps = config::warps;
     // The number of counters that are actively being used.

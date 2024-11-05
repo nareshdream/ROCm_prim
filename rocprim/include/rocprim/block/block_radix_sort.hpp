@@ -33,6 +33,7 @@
 #include "../warp/warp_exchange.hpp"
 #include "block_exchange.hpp"
 #include "block_radix_rank.hpp"
+#include "rocprim/block/config.hpp"
 
 /// \addtogroup blockmodule
 /// @{
@@ -106,7 +107,8 @@ template<class Key,
          block_radix_rank_algorithm RadixRankAlgorithm
          = (BlockSizeX * BlockSizeY * BlockSizeZ) % device_warp_size() == 0
                ? block_radix_rank_algorithm::match
-               : block_radix_rank_algorithm::basic_memoize>
+               : block_radix_rank_algorithm::basic_memoize,
+         block_padding_hint PaddingHint = block_padding_hint::lds_occupancy_bound>
 class block_radix_sort
 {
     static_assert(RadixBitsPerPass > 0 && RadixBitsPerPass < 32,
@@ -127,11 +129,11 @@ class block_radix_sort
         = alignof(Key) == alignof(Value) && sizeof(Key) == sizeof(Value);
 
     using block_rank_type = ::rocprim::
-        block_radix_rank<BlockSizeX, RadixBitsPerPass, RadixRankAlgorithm, BlockSizeY, BlockSizeZ>;
+        block_radix_rank<BlockSizeX, RadixBitsPerPass, RadixRankAlgorithm, BlockSizeY, BlockSizeZ, PaddingHint>;
     using keys_exchange_type
-        = ::rocprim::block_exchange<Key, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, block_exchange_padding_mode::max_occupancy>;
+        = ::rocprim::block_exchange<Key, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, PaddingHint>;
     using values_exchange_type
-        = ::rocprim::block_exchange<Value, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, block_exchange_padding_mode::max_occupancy>;
+        = ::rocprim::block_exchange<Value, BlockSizeX, ItemsPerThread, BlockSizeY, BlockSizeZ, PaddingHint>;
 
     // Struct used for creating a raw_storage object for this primitive's temporary storage.
     union storage_type_

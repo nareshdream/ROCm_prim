@@ -27,6 +27,9 @@
 #include "../functional.hpp"
 #include "../intrinsics.hpp"
 #include "../types.hpp"
+
+#include "config.hpp"
+
 #include <cstddef>
 
 /// \addtogroup blockmodule
@@ -34,25 +37,13 @@
 
 BEGIN_ROCPRIM_NAMESPACE
 
-/// \brief Available padding options for \p block_exchange .
-enum block_exchange_padding_mode
-{
-    /// Use padding to avoid bank conflicts when applicable.
-    use_padding = 0,
-
-    /// Never use padding.
-    no_padding = 1,
-
-    /// Only use padding when there is no cost to occupancy.
-    max_occupancy = 2,
-};
-
 /// \brief The \p block_exchange class is a block level parallel primitive which provides
 /// methods for rearranging items partitioned across threads in a block.
 ///
 /// \tparam T - the input type.
 /// \tparam BlockSize - the number of threads in a block.
 /// \tparam ItemsPerThread - the number of items contributed by each thread.
+/// \tparam PaddingHint - a hint that decides when to use padding. May not always be applicable.
 ///
 /// \par Overview
 /// * The \p block_exchange class supports the following rearrangement methods:
@@ -91,7 +82,7 @@ template<
     unsigned int ItemsPerThread,
     unsigned int BlockSizeY = 1,
     unsigned int BlockSizeZ = 1,
-    block_exchange_padding_mode PaddingMode = block_exchange_padding_mode::use_padding
+    block_padding_hint PaddingHint = block_padding_hint::avoid_conflicts
 >
 class block_exchange
 {
@@ -128,18 +119,11 @@ class block_exchange
         static constexpr unsigned int storage_count = BlockSize * ItemsPerThread + Config::padding;
         static constexpr unsigned int storage_size  = sizeof(T) * storage_count;
         static constexpr unsigned int occupancy     = detail::get_min_lds_size() / storage_size;
-
-        // score is requried for 'select_max_by_score_t'
-        static constexpr unsigned int score = occupancy;
     };
 
-    using config = std::conditional_t<
-        PaddingMode == block_exchange_padding_mode::use_padding,
-        build_config<padded_config>,
-        std::conditional_t<PaddingMode == block_exchange_padding_mode::no_padding,
-                           build_config<unpadded_config>,
-                           detail::select_max_by_score_t<build_config<padded_config>,
-                                                         build_config<unpadded_config>>>>;
+    using config = detail::select_block_padding_config<PaddingHint,
+                                                       build_config<padded_config>,
+                                                       build_config<unpadded_config>>;
 
     static constexpr bool         has_bank_conflicts     = config::has_bank_conflicts;
     static constexpr unsigned int bank_conflicts_padding = config::padding;
