@@ -72,7 +72,6 @@ def delete_dir(dir_path) :
         run_cmd( "RMDIR" , f"/S /Q {dir_path}")
     else:
         linux_path = pathlib.Path(dir_path).absolute()
-        #print( linux_path )
         run_cmd( "rm" , f"-rf {linux_path}")
 
 def cmake_path(os_path):
@@ -143,7 +142,7 @@ def config_cmd():
         deps_dir = os.path.abspath(os.path.join(build_dir, 'deps')).replace('\\','/')
     else:
         deps_dir = args.deps_dir
-    cmake_base_options = f"-DROCM_PATH={rocm_path} -DCMAKE_PREFIX_PATH:PATH={rocm_path[:-1]};{rocm_cmake_path[1:]}" # -DCMAKE_INSTALL_PREFIX=rocmath-install" #-DCMAKE_INSTALL_LIBDIR=
+    cmake_base_options = f"-DROCM_PATH={rocm_path} -DCMAKE_PREFIX_PATH:PATH={rocm_path[:-1]},{rocm_cmake_path[1:-1]}" # -DCMAKE_INSTALL_PREFIX=rocmath-install" #-DCMAKE_INSTALL_LIBDIR=
     cmake_options.append( cmake_base_options )
 
     print( cmake_options )
@@ -208,7 +207,7 @@ def make_cmd():
           make_options.append( "--target package --target install" )
     else:
         nproc = OS_info["NUM_PROC"]
-        make_executable = f"make -j{nproc}"
+        make_executable = f"make -j {nproc}"
         if args.verbose:
           make_options.append( "VERBOSE=1" )
         if args.install:
