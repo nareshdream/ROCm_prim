@@ -11,7 +11,7 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ### Changed
 
 ### Resolved issues
-
+* Fixed an issue where `rmake.py` would generate wrong CMAKE commands while using Linux enviorment
 * Fixed an issue where `rocprim::partial_sort_copy` would yield a compile error if the input iterator is const.
 * Fixed incorrect 128-bit signed and unsigned integers type traits.
 * Fixed compilation issue when `rocprim::radix_key_codec<...>` is specialized with a 128-bit integer.
