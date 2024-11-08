@@ -6,7 +6,8 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ## (Unreleased) rocPRIM 3.4.0 for ROCm 6.4.0
 
 ### Added
-
+* Added regression tests to `rtest.py`. Regression tests are a subset of tests that caused hardware problems for past emulation environments.
+  * Can be run with `python rtest.py [--emulation|-e|--test|-t]=regression`
 * Added the parallel `find_first_of` device function with autotuned configurations, this function is similar to `std::find_first_of`, it searches for the first occurrence of any of the provided elements.
 * Added `--emulation` option added for `rtest.py`
 * Unit tests can be ran with `[--emulation|-e|--test|-t]=<test_name>`
