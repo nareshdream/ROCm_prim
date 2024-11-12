@@ -6,20 +6,20 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ## (Unreleased) rocPRIM 3.4.0 for ROCm 6.4.0
 
 ### Added
+* Added extended tests to `rtest.py`. These tests are extra tests that did not fit the criteria of smoke and regression tests. These tests will take much longer to run relative to smoke and regression tests.
+ * Use `python rtest.py [--emulation|-e|--test|-t]=extended` to run these tests.
 * Added regression tests to `rtest.py`. Regression tests are a subset of tests that caused hardware problems for past emulation environments.
   * Can be run with `python rtest.py [--emulation|-e|--test|-t]=regression`
 * Added the parallel `find_first_of` device function with autotuned configurations, this function is similar to `std::find_first_of`, it searches for the first occurrence of any of the provided elements.
 * Added `--emulation` option added for `rtest.py`
-  * Unit tests can now be ran with `[--emulation|-e|--test|-t]=<test_name>`
+  * Unit tests can be run with `[--emulation|-e|--test|-t]=<test_name>`
 
 ### Changed
-  * Changed subset of tests to be ran for smoke tests such that it will complete in faster run-time and to never exceed 2GB of vram usage
-  * Old smoke tests can be ran with python3 rtest.py --test/-t smoke_old or python3 rtest.py --emulation/-e smoke_old instead
-  * The `rtest.py` options have changed.  `rtest.py` is now run with at least either `--test|-t` or `--emulation|-e`, but not both options.
-
+* Changed the subset of tests that are run for smoke tests such that the smoke test will complete with faster run-time and to never exceed 2GB of vram usage. Use `python rtest.py [--emulation|-e|--test|-t]=smoke` to run these tests.
+* The `rtest.py` options have changed. `rtest.py` is now run with at least either `--test|-t` or `--emulation|-e`, but not both options.
 
 ### Resolved issues
-
+* Fixed an issue where `rmake.py` would generate wrong CMAKE commands while using Linux environment
 * Fixed an issue where `rocprim::partial_sort_copy` would yield a compile error if the input iterator is const.
 * Fixed incorrect 128-bit signed and unsigned integers type traits.
 * Fixed compilation issue when `rocprim::radix_key_codec<...>` is specialized with a 128-bit integer.
