@@ -208,7 +208,10 @@ inline auto generate_random_data_n(OutputIterator it,
     using T = typename std::iterator_traits<OutputIterator>::value_type;
 
     // Generate floats when T is half
-    using dis_type = std::conditional_t<std::is_same<rocprim::half, T>::value, float, T>;
+    using dis_type = std::conditional_t<std::is_same<rocprim::half, T>::value
+                                            || std::is_same<rocprim::bfloat16, T>::value,
+                                        float,
+                                        T>;
     std::uniform_real_distribution<dis_type> distribution((dis_type)min, (dis_type)max);
     std::generate_n(it, std::min(size, max_random_size), [&]() { return distribution(gen); });
     for(size_t i = max_random_size; i < size; i += max_random_size)
@@ -337,11 +340,11 @@ struct generate_limits<T, std::enable_if_t<rocprim::is_integral<T>::value>>
 {
     static inline T min()
     {
-        return std::numeric_limits<T>::min();
+        return rocprim::numeric_limits<T>::min();
     }
     static inline T max()
     {
-        return std::numeric_limits<T>::max();
+        return rocprim::numeric_limits<T>::max();
     }
 };
 
@@ -444,19 +447,19 @@ auto limit_cast(U value) -> T
     {
         if(value < 0)
         {
-            return std::numeric_limits<T>::min();
+            return rocprim::numeric_limits<T>::min();
         }
         if(static_cast<common_type>(value)
-           > static_cast<common_type>(std::numeric_limits<T>::max()))
+           > static_cast<common_type>(rocprim::numeric_limits<T>::max()))
         {
-            return std::numeric_limits<T>::max();
+            return rocprim::numeric_limits<T>::max();
         }
     }
     else if(rocprim::is_signed<T>::value && rocprim::is_unsigned<U>::value)
     {
-        if(value > std::numeric_limits<T>::max())
+        if(value > rocprim::numeric_limits<T>::max())
         {
-            return std::numeric_limits<T>::max();
+            return rocprim::numeric_limits<T>::max();
         }
     }
     else if(rocprim::is_floating_point<T>::value)
@@ -465,13 +468,13 @@ auto limit_cast(U value) -> T
     }
     else // Both T and U are signed
     {
-        if(value < static_cast<common_type>(std::numeric_limits<T>::min()))
+        if(value < static_cast<common_type>(rocprim::numeric_limits<T>::min()))
         {
-            return std::numeric_limits<T>::min();
+            return rocprim::numeric_limits<T>::min();
         }
-        else if(value > static_cast<common_type>(std::numeric_limits<T>::max()))
+        else if(value > static_cast<common_type>(rocprim::numeric_limits<T>::max()))
         {
-            return std::numeric_limits<T>::max();
+            return rocprim::numeric_limits<T>::max();
         }
     }
     return static_cast<T>(value);
@@ -556,7 +559,7 @@ std::vector<T>
     using key_distribution_type = std::conditional_t<rocprim::is_integral<T>::value,
                                                      std::uniform_int_distribution<dis_type>,
                                                      std::uniform_real_distribution<dis_type>>;
-    key_distribution_type key_distribution(std::numeric_limits<T>::max());
+    key_distribution_type key_distribution(rocprim::numeric_limits<T>::max());
     std::vector<T>        keys(size);
 
     size_t keys_start_index = 0;
@@ -592,6 +595,28 @@ std::vector<T>
         keys_start_index += new_segment_length;
     }
     return keys;
+}
+
+template<class T, class U, class V>
+inline auto get_random_value(U min, V max, size_t seed_value)
+    -> std::enable_if_t<rocprim::is_arithmetic<T>::value, T>
+{
+    T           result;
+    engine_type gen(seed_value);
+    generate_random_data_n(&result, 1, min, max, gen);
+    return result;
+}
+
+template<class T>
+inline auto get_random_value(T min, T max, size_t seed_value)
+    -> std::enable_if_t<is_custom_type<T>::value, T>
+{
+    typename T::first_type  result_first;
+    typename T::second_type result_second;
+    engine_type             gen(seed_value);
+    generate_random_data_n(&result_first, 1, min.x, max.x, gen);
+    generate_random_data_n(&result_second, 1, min.y, max.y, gen);
+    return T{result_first, result_second};
 }
 
 template <typename T, T, typename>
@@ -929,6 +954,11 @@ template<>
 inline const char* Traits<rocprim::half>::name()
 {
     return "rocprim::half";
+}
+template<>
+inline const char* Traits<rocprim::bfloat16>::name()
+{
+    return "rocprim::bfloat16";
 }
 template<>
 inline const char* Traits<long long>::name()

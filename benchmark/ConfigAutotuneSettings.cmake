@@ -33,6 +33,10 @@ function(read_config_autotune_settings file list_across_names list_across output
     set(list_across "${TUNING_TYPES};\
 true;false true;32 64 128 256 512 1024" PARENT_SCOPE)
     set(output_pattern_suffix "@DataType@_@Left@_@InPlace@_@BlockSize@" PARENT_SCOPE)
+  elseif(file STREQUAL "benchmark_device_adjacent_find")
+    set(list_across_names "InputType;BlockSize" PARENT_SCOPE)
+    set(list_across "${TUNING_TYPES};64 128 256 512 1024" PARENT_SCOPE)
+    set(output_pattern_suffix "@InputType@_@BlockSize@" PARENT_SCOPE)
   elseif(file STREQUAL "benchmark_device_histogram")
     set(list_across_names "DataType;BlockSize" PARENT_SCOPE)
     set(list_across "${TUNING_TYPES};64 128 256" PARENT_SCOPE)
@@ -83,16 +87,16 @@ binary_search upper_bound lower_bound;${TUNING_TYPES};${LIMITED_TUNING_TYPES};64
     set(output_pattern_suffix "@SubAlgorithm@_@ValueType@_@OutputType@_@BlockSize@_@ItemsPerThread@" PARENT_SCOPE)
   elseif(file STREQUAL "benchmark_device_segmented_radix_sort_keys")
     set(list_across_names "\
-KeyType;BlockSize;ItemsPerThread;PartitionAllowed" PARENT_SCOPE)
-    set(list_across "${TUNING_TYPES};128 256;4 8 16;false" PARENT_SCOPE)
+KeyType;LongBits;BlockSize;ItemsPerThread;WarpSmallLWS;WarpSmallIPT;WarpSmallBS;WarpPartition;WarpMediumLWS;WarpMediumIPT;WarpMediumBS" PARENT_SCOPE)
+    set(list_across "${TUNING_TYPES};8;256;4 8 16;8;4;256;64;16;8;256" PARENT_SCOPE)
     set(output_pattern_suffix "\
-@KeyType@_@BlockSize@_@ItemsPerThread@_@PartitionAllowed@" PARENT_SCOPE)
+@KeyType@_@LongBits@_@BlockSize@_@ItemsPerThread@_@WarpSmallLWS@_@WarpSmallIPT@_@WarpSmallBS@_@WarpPartition@_@WarpMediumLWS@_@WarpMediumIPT@_@WarpMediumBS@" PARENT_SCOPE)
   elseif(file STREQUAL "benchmark_device_segmented_radix_sort_pairs")
     set(list_across_names "\
-KeyType;ValueType;BlockSize;ItemsPerThread;PartitionAllowed" PARENT_SCOPE)
-    set(list_across "${TUNING_TYPES};int8_t;64;4 8 16;true false" PARENT_SCOPE)
+KeyType;ValueType;LongBits;BlockSize;ItemsPerThread;WarpSmallLWS;WarpSmallIPT;WarpSmallBS;WarpPartition;WarpMediumLWS;WarpMediumIPT;WarpMediumBS" PARENT_SCOPE)
+    set(list_across "${TUNING_TYPES};int8_t;8;256;4 8 16;8;4;256;64;16;8;256" PARENT_SCOPE)
     set(output_pattern_suffix "\
-@KeyType@_@ValueType@_@BlockSize@_@ItemsPerThread@_@PartitionAllowed@" PARENT_SCOPE)
+@KeyType@_@ValueType@_@LongBits@_@BlockSize@_@ItemsPerThread@_@WarpSmallLWS@_@WarpSmallIPT@_@WarpSmallBS@_@WarpPartition@_@WarpMediumLWS@_@WarpMediumIPT@_@WarpMediumBS@" PARENT_SCOPE)
   elseif(file STREQUAL "benchmark_device_transform")
     set(list_across_names "\
 DataType;BlockSize;" PARENT_SCOPE)
@@ -115,5 +119,9 @@ DataType;BlockSize;" PARENT_SCOPE)
     set(list_across_names "DataType;BlockSize" PARENT_SCOPE)
     set(list_across "${LIMITED_TUNING_TYPES};32 64 128 256 512 1024" PARENT_SCOPE)
     set(output_pattern_suffix "@DataType@_@BlockSize@" PARENT_SCOPE)
+  elseif(file STREQUAL "benchmark_device_merge")
+    set(list_across_names "KeyType;ValueType;BlockSize" PARENT_SCOPE)
+    set(list_across "${TUNING_TYPES};rocprim::empty_type ${LIMITED_TUNING_TYPES};32 64 128 256 512 1024" PARENT_SCOPE)
+    set(output_pattern_suffix "@KeyType@_@ValueType@_@BlockSize@" PARENT_SCOPE)
   endif()
 endfunction()
