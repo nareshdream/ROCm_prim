@@ -2,10 +2,10 @@
 
 Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projects/rocPRIM/en/latest/](https://rocm.docs.amd.com/projects/rocPRIM/en/latest/).
 
-
 ## (Unreleased) rocPRIM 3.4.0 for ROCm 6.4.0
 
 ### Added
+
 * Added extended tests to `rtest.py`. These tests are extra tests that did not fit the criteria of smoke and regression tests. These tests will take much longer to run relative to smoke and regression tests.
  * Use `python rtest.py [--emulation|-e|--test|-t]=extended` to run these tests.
 * Added regression tests to `rtest.py`. Regression tests are a subset of tests that caused hardware problems for past emulation environments.
@@ -15,10 +15,12 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
   * Unit tests can be run with `[--emulation|-e|--test|-t]=<test_name>`
 
 ### Changed
+
 * Changed the subset of tests that are run for smoke tests such that the smoke test will complete with faster run-time and to never exceed 2GB of vram usage. Use `python rtest.py [--emulation|-e|--test|-t]=smoke` to run these tests.
 * The `rtest.py` options have changed. `rtest.py` is now run with at least either `--test|-t` or `--emulation|-e`, but not both options.
 
 ### Resolved issues
+
 * Fixed an issue where `rmake.py` would generate wrong CMAKE commands while using Linux environment
 * Fixed an issue where `rocprim::partial_sort_copy` would yield a compile error if the input iterator is const.
 * Fixed incorrect 128-bit signed and unsigned integers type traits.
@@ -26,10 +28,13 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 ### Upcoming changes
 
+* Using the initialisation constructor of rocprim::reverse_iterator will throw a deprecation warning. It will be marked as explicit in the next major release.
+
 ## rocPRIM 3.3.0 for ROCm 6.3.0
 
 ### Added
 
+* Changed the default value of `rmake.py -a` to `default_gpus`. This is equivalent to `gfx906:xnack-,gfx1030,gfx1100,gfx1101,gfx1102,gfx1151,gfx1200,gfx1201`.
 * The `--test smoke` option has been added to `rtest.py`. When `rtest.py` is called with this option it runs a subset of tests such that the total test time is 5 minutes. Use `python3 ./rtest.py --test smoke` or `python3 ./rtest.py -t smoke` to run the smoke test.
 * The `--seed` option has been added to `run_benchmarks.py`. The `--seed` option specifies a seed for the generation of random inputs. When the option is omitted, the default behavior is to use a random seed for each benchmark measurement.
 * Added configuration autotuning to device partition (`rocprim::partition`, `rocprim::partition_two_way`, and `rocprim::partition_three_way`), to device select (`rocprim::select`, `rocprim::unique`, and `rocprim::unique_by_key`), and to device reduce by key (`rocprim::reduce_by_key`) to improve performance on selected architectures.
@@ -51,6 +56,7 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 ### Resolved issues
 
+* Fixed an issue in `rmake.py` where the list storing cmake options would contain individual characters instead of a full string of options.
 * Resolved an issue in `rtest.py` where it crashed if the `build` folder was created without `release` or `debug` subdirectories.
 * Resolved an issue with `rtest.py` on Windows where passing an absolute path to `--install_dir` caused a `FileNotFound` error.
 * rocPRIM functions are no longer forcefully inlined on Windows. This significantly reduces the build
