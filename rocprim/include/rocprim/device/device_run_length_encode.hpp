@@ -100,7 +100,7 @@ template<typename Config,
          typename CountsOutputIterator,
          typename RunsCountOutputIterator,
          typename LookbackScanState>
-ROCPRIM_KERNEL __launch_bounds__(device_params<Config>().kernel_config.block_size) void
+ROCPRIM_KERNEL ROCPRIM_LAUNCH_BOUNDS(device_params<Config>().kernel_config.block_size) void
     non_trivial_kernel(const InputIterator           input,
                        const OffsetsOutputIterator   offsets_output,
                        const CountsOutputIterator    counts_output,

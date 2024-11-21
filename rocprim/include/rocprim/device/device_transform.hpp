@@ -49,8 +49,8 @@ template<class Config,
          class OutputIterator,
          class UnaryFunction>
 ROCPRIM_KERNEL
-    __launch_bounds__(device_params<Config>().kernel_config.block_size) void transform_kernel(
-        InputIterator input, const size_t size, OutputIterator output, UnaryFunction transform_op)
+    ROCPRIM_LAUNCH_BOUNDS(device_params<Config>().kernel_config.block_size) void transform_kernel(
+    InputIterator input, const size_t size, OutputIterator output, UnaryFunction transform_op)
 {
     transform_kernel_impl<device_params<Config>().kernel_config.block_size,
                           device_params<Config>().kernel_config.items_per_thread,

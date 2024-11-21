@@ -153,9 +153,8 @@ ROCPRIM_DEVICE ROCPRIM_FORCE_INLINE void
 }
 
 template<class config, class KeysIterator, class BinaryFunction>
-ROCPRIM_KERNEL
-    __launch_bounds__(device_params<config>().stop_recursion_size) void kernel_block_sort(
-        KeysIterator keys, const size_t size, BinaryFunction compare_function)
+ROCPRIM_KERNEL ROCPRIM_LAUNCH_BOUNDS(device_params<config>().stop_recursion_size) void
+    kernel_block_sort(KeysIterator keys, const size_t size, BinaryFunction compare_function)
 {
     kernel_block_sort_impl<config>(keys, size, compare_function);
 }
@@ -203,13 +202,14 @@ ROCPRIM_DEVICE ROCPRIM_FORCE_INLINE void
 }
 
 template<class config, class KeysIterator, class BinaryFunction>
-ROCPRIM_KERNEL __launch_bounds__(
+ROCPRIM_KERNEL ROCPRIM_LAUNCH_BOUNDS(
     device_params<config>().number_of_buckets
-    - 1) void kernel_find_splitters(KeysIterator                                             keys,
-                                    typename std::iterator_traits<KeysIterator>::value_type* tree,
-                                    bool*          equality_buckets,
-                                    const size_t   size,
-                                    BinaryFunction compare_function)
+    - 1) void
+    kernel_find_splitters(KeysIterator                                             keys,
+                          typename std::iterator_traits<KeysIterator>::value_type* tree,
+                          bool*                                                    equality_buckets,
+                          const size_t                                             size,
+                          BinaryFunction                                           compare_function)
 {
     kernel_find_splitters_impl<config>(keys, tree, equality_buckets, size, compare_function);
 }
@@ -319,16 +319,16 @@ ROCPRIM_DEVICE ROCPRIM_FORCE_INLINE void
 }
 
 template<class config, class KeysIterator, class BinaryFunction>
-ROCPRIM_KERNEL __launch_bounds__(
+ROCPRIM_KERNEL ROCPRIM_LAUNCH_BOUNDS(
     device_params<config>()
         .kernel_config
-        .block_size) void kernel_count_bucket_sizes(KeysIterator keys,
-                                                    typename std::iterator_traits<
-                                                        KeysIterator>::value_type* tree,
-                                                    const size_t                   size,
-                                                    size_t*                        buckets,
-                                                    bool*                          equality_buckets,
-                                                    BinaryFunction                 compare_function)
+        .block_size) void
+    kernel_count_bucket_sizes(KeysIterator                                             keys,
+                              typename std::iterator_traits<KeysIterator>::value_type* tree,
+                              const size_t                                             size,
+                              size_t*                                                  buckets,
+                              bool*          equality_buckets,
+                              BinaryFunction compare_function)
 {
     kernel_count_bucket_sizes_impl<config>(keys,
                                            tree,
@@ -385,13 +385,13 @@ ROCPRIM_DEVICE ROCPRIM_FORCE_INLINE void
 }
 
 template<class config>
-ROCPRIM_KERNEL __launch_bounds__(
+ROCPRIM_KERNEL ROCPRIM_LAUNCH_BOUNDS(
     device_params<config>()
-        .number_of_buckets) void kernel_find_nth_element_bucket(size_t* buckets,
-                                                                n_th_element_iteration_data*
-                                                                             nth_element_data,
-                                                                bool*        equality_buckets,
-                                                                const size_t rank)
+        .number_of_buckets) void
+    kernel_find_nth_element_bucket(size_t*                      buckets,
+                                   n_th_element_iteration_data* nth_element_data,
+                                   bool*                        equality_buckets,
+                                   const size_t                 rank)
 
 {
     kernel_find_nth_element_bucket_impl<config>(buckets, nth_element_data, equality_buckets, rank);
@@ -588,15 +588,15 @@ ROCPRIM_DEVICE ROCPRIM_FORCE_INLINE void
 
 template<class config, unsigned int NumPartitions, class KeysIterator, class BinaryFunction>
 ROCPRIM_KERNEL
-    __launch_bounds__(device_params<config>().kernel_config.block_size) void kernel_copy_buckets(
-        KeysIterator                                             keys,
-        typename std::iterator_traits<KeysIterator>::value_type* tree,
-        const size_t                                             size,
-        nth_element_onesweep_lookback_state*                     lookback_states,
-        n_th_element_iteration_data*                             nth_element_data,
-        typename std::iterator_traits<KeysIterator>::value_type* keys_buffer,
-        bool*                                                    equality_buckets,
-        BinaryFunction                                           compare_function)
+    ROCPRIM_LAUNCH_BOUNDS(device_params<config>().kernel_config.block_size) void
+    kernel_copy_buckets(KeysIterator                                             keys,
+                        typename std::iterator_traits<KeysIterator>::value_type* tree,
+                        const size_t                                             size,
+                        nth_element_onesweep_lookback_state*                     lookback_states,
+                        n_th_element_iteration_data*                             nth_element_data,
+                        typename std::iterator_traits<KeysIterator>::value_type* keys_buffer,
+                        bool*                                                    equality_buckets,
+                        BinaryFunction                                           compare_function)
 {
     kernel_copy_buckets_impl<config, NumPartitions>(keys,
                                                     tree,
