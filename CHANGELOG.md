@@ -5,7 +5,8 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ## rocPRIM 3.5.0 for ROCm 6.5.0
 
 ### Added
-* gfx950 support
+
+* Added gfx950 support.
 
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
@@ -26,6 +27,8 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 * Added the parallel `search` and `find_end` device functions similar to `std::search` and `std::find_end`, these functions search for the first and last occurrence of the sequence respectively.
 * Added a parallel device-level function, `rocprim::search_n`, similar to the C++ Standard Library `std::search_n` algorithm.
 * Added new constructors and a `base` function, and added `constexpr` specifier to all functions in `rocprim::reverse_iterator` to improve parity with the C++17 `std::reverse_iterator`.
+* Added hipGraph support to device run-length-encode for non trivial runs (`rocprim::run_length_encode_non_trivial_runs`).
+* Added configuration autotuning to device run-length-encode for non trivial runs (`rocprim::run_length_encode_non_trivial_runs`) for improved performance on selected architectures.
 
 ### Changed
 
