@@ -137,7 +137,7 @@ if(BUILD_CODE_COVERAGE)
 endif()
 
 # Setup VERSION
-set(VERSION_STRING "3.3.0")
+set(VERSION_STRING "3.4.0")
 rocm_setup_version(VERSION ${VERSION_STRING})
 
 # Print configuration summary
