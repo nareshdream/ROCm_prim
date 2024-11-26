@@ -8,6 +8,10 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 * Added gfx950 support.
 
+### Resolved issues
+
+* Fixed device radix sort not returning the correct required temporary storage when a double buffer contains `nullptr`.
+
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
 ### Added
