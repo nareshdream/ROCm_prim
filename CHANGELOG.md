@@ -12,6 +12,10 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 * Fixed device radix sort not returning the correct required temporary storage when a double buffer contains `nullptr`.
 
+### Resolved issues
+
+* Fixed the warp-level reduction `rocprim::warp_reduce.reduce` DPP implementation to avoid undefined intermediate values during the reduction.
+
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
 ### Added
