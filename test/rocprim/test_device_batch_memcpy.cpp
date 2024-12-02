@@ -31,6 +31,7 @@
 #include "rocprim/device/device_copy.hpp"
 #include "rocprim/device/device_memcpy.hpp"
 #include "rocprim/intrinsics/thread.hpp"
+#include "rocprim/iterator.hpp"
 
 #include <gtest/gtest-typed-test.h>
 #include <gtest/gtest.h>
@@ -40,6 +41,7 @@
 #include <random>
 #include <type_traits>
 
+#include <cstddef>
 #include <cstring>
 
 #include <stdint.h>
@@ -534,4 +536,115 @@ TYPED_TEST(RocprimDeviceBatchMemcpyTests, SizeAndTypeVariation)
         HIP_CHECK(hipFree(d_output));
         HIP_CHECK(hipFree(d_input));
     }
+}
+
+struct GetIteratorToRange
+{
+    __host__ __device__ __forceinline__
+    auto operator()(unsigned int index) const
+    {
+        return rocprim::make_constant_iterator(d_data_in[index]);
+    }
+    unsigned int* d_data_in;
+};
+
+struct GetPtrToRange
+{
+    __host__ __device__ __forceinline__
+    auto operator()(unsigned int index) const
+    {
+        return d_data_out + d_offsets[index];
+    }
+    unsigned int* d_data_out;
+    unsigned int* d_offsets;
+};
+
+struct GetRunLength
+{
+    __host__ __device__ __forceinline__
+    unsigned int
+        operator()(unsigned int index) const
+    {
+        return d_offsets[index + 1] - d_offsets[index];
+    }
+    unsigned int* d_offsets;
+};
+
+TEST(RocprimDeviceBatchMemcpyTests, IteratorTest)
+{
+    // Create the data and copy it to the device.
+    const unsigned int num_ranges  = 5;
+    const unsigned int num_outputs = 14;
+
+    std::vector<unsigned int> h_data_in = {4, 2, 7, 3, 1}; // size should be num_ranges
+    std::vector<unsigned int> h_data_out(num_outputs, 0); // size should be num_outputs
+    std::vector<unsigned int> h_offsets
+        = {0, 2, 5, 6, 9, 14}; // max value should be num_outputs, size should be (num_ranges + 1)
+
+    unsigned int* d_data_in; // [4, 2, 7, 3, 1]
+    unsigned int* d_data_out; // [0,                ...               ]
+    unsigned int* d_offsets; // [0, 2, 5, 6, 9, 14]
+
+    HIP_CHECK(hipMalloc(&d_data_in, sizeof(unsigned int) * num_ranges));
+    HIP_CHECK(hipMalloc(&d_data_out, sizeof(unsigned int) * num_outputs));
+    HIP_CHECK(hipMalloc(&d_offsets, sizeof(unsigned int) * (num_ranges + 1)));
+
+    HIP_CHECK(hipMemcpy(d_data_in,
+                        h_data_in.data(),
+                        sizeof(unsigned int) * num_ranges,
+                        hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_data_out,
+                        h_data_out.data(),
+                        sizeof(unsigned int) * num_outputs,
+                        hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_offsets,
+                        h_offsets.data(),
+                        sizeof(unsigned int) * (num_ranges + 1),
+                        hipMemcpyHostToDevice));
+
+    // Returns a constant iterator to the element of the i-th run
+    rocprim::counting_iterator<unsigned int> iota(0);
+    auto iterators_in = rocprim::make_transform_iterator(iota, GetIteratorToRange{d_data_in});
+
+    // Returns the run length of the i-th run
+    auto sizes = rocprim::make_transform_iterator(iota, GetRunLength{d_offsets});
+
+    // Returns pointers to the output range for each run
+    auto ptrs_out = rocprim::make_transform_iterator(iota, GetPtrToRange{d_data_out, d_offsets});
+
+    // Determine temporary device storage requirements
+    void*  d_temp_storage     = nullptr;
+    size_t temp_storage_bytes = 0;
+    batch_copy<false>(d_temp_storage,
+                      temp_storage_bytes,
+                      iterators_in,
+                      ptrs_out,
+                      sizes,
+                      num_ranges,
+                      0);
+
+    // Allocate temporary storage
+    HIP_CHECK(hipMalloc(&d_temp_storage, temp_storage_bytes));
+
+    // Run batched copy algorithm (used to perform runlength decoding)
+    batch_copy<false>(d_temp_storage,
+                      temp_storage_bytes,
+                      iterators_in,
+                      ptrs_out,
+                      sizes,
+                      num_ranges,
+                      0);
+
+    // Copy results back to host and print
+    HIP_CHECK(
+        hipMemcpy(h_data_out.data(), d_data_out, sizeof(int) * num_outputs, hipMemcpyDeviceToHost));
+
+    std::vector<unsigned int> expected = {4, 4, 2, 2, 2, 7, 3, 3, 3, 1, 1, 1, 1, 1};
+    test_utils::assert_eq(expected, h_data_out);
+
+    // Clean up
+    HIP_CHECK(hipFree(d_temp_storage));
+    HIP_CHECK(hipFree(d_data_in));
+    HIP_CHECK(hipFree(d_data_out));
+    HIP_CHECK(hipFree(d_offsets));
 }
