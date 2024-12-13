@@ -7,14 +7,12 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ### Added
 
 * Added gfx950 support.
+* Added missing operator `rocprim::key_value_pair::operator==`.
 
 ### Resolved issues
 
 * Fixed device radix sort not returning the correct required temporary storage when a double buffer contains `nullptr`.
-
-### Resolved issues
-
-* Fixed the warp-level reduction `rocprim::warp_reduce.reduce` DPP implementation to avoid undefined intermediate values during the reduction.
+* Fixed constness of equality operators (`==` and `!=`) in `rocprim::key_value_pair`. 
 
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
