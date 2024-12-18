@@ -8,6 +8,7 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 
 * Added gfx950 support.
 * Added missing operator `rocprim::key_value_pair::operator==`.
+* Added `rocprim::unrolled_copy` thread function to copy multiple items inside the thread.
 
 ### Resolved issues
 
