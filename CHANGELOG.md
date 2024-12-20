@@ -9,11 +9,22 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 * Added gfx950 support.
 * Added missing operator `rocprim::key_value_pair::operator==`.
 * Added `rocprim::unrolled_copy` thread function to copy multiple items inside the thread.
+* Added `rocprim::unrolled_thread_load` thread function to load multiple items inside the thread using `rocprim::thread_load`.
+* Added `rocprim::int128_t` and `rocprim::uint128_t` to benchmarks for improved performance evaluation on 128-bit integers.
+* Added `rocprim::int128_t` to autotuning supported types to improve performance for 128-bit integers.
+* Added `rocprim::merge_inplace` function that allows merging in-place.
+* Added initial value support for warp- and block-level inclusive scan.
+
+### Changed
+
+* Undeprecated `rocprim::thread_load` uses dereference as default and updated other cache load modifiers.
+* Undeprecated `rocprim::thread_store` uses dereference as default and updated other cache store modifiers.
+* Changed symbol visibility: all kernels now have hidden visibility, inline namespace with the library version is added, e.g. `rocprim::ROCPRIM_300400_NS::...`. This allows to link multiple libraries built with different versions of rocPRIM.
 
 ### Resolved issues
 
 * Fixed device radix sort not returning the correct required temporary storage when a double buffer contains `nullptr`.
-* Fixed constness of equality operators (`==` and `!=`) in `rocprim::key_value_pair`. 
+* Fixed constness of equality operators (`==` and `!=`) in `rocprim::key_value_pair`.
 
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
