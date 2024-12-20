@@ -131,23 +131,23 @@ public:
 
 using custom_config1 = rocprim::histogram_config<rocprim::kernel_config<128, 5>>;
 
-typedef ::testing::Types<params1<int, 10, 0, 10>,
-                         params1<float, 10, 0, 10>,
-                         params1<float, 10, 0, 10, float, float>,
-                         params1<rocprim::half, 10, 0, 10>,
-                         params1<rocprim::bfloat16, 10, 0, 10>,
-                         params1<int8_t, 10, 0, 10>,
-                         params1<int, 128, 0, 256, int, int, custom_config1>,
-                         params1<unsigned int, 12345, 10, 12355, short>,
-                         params1<unsigned short, 65536, 0, 65536, int>,
-                         params1<unsigned char, 10, 20, 240, unsigned char, unsigned int>,
-                         params1<unsigned char, 256, 0, 256, short>,
-                         params1<double, 10, 0, 1000, double, int>,
-                         params1<double, 10, 0, 1000, double, double>,
-                         params1<int, 123, 100, 5635, int>,
-                         params1<double, 55, -123, +123, double, unsigned int, custom_config1>,
-                         params1<int, 10, 0, 10, int, int, rocprim::default_config, true>>
-    Params1;
+using Params1
+    = ::testing::Types<params1<int, 10, 0, 10>,
+                       params1<float, 10, 0, 10>,
+                       params1<float, 10, 0, 10, float, float>,
+                       params1<rocprim::half, 10, 0, 10>,
+                       params1<rocprim::bfloat16, 10, 0, 10>,
+                       params1<int8_t, 10, 0, 10>,
+                       params1<int, 128, 0, 256, int, int, custom_config1>,
+                       params1<unsigned int, 12345, 10, 12355, short>,
+                       params1<unsigned short, 65536, 0, 65536, int>,
+                       params1<unsigned char, 10, 20, 240, unsigned char, unsigned int>,
+                       params1<unsigned char, 256, 0, 256, short>,
+                       params1<double, 10, 0, 1000, double, int>,
+                       params1<double, 10, 0, 1000, double, double>,
+                       params1<int, 123, 100, 5635, int>,
+                       params1<double, 55, -123, +123, double, unsigned int, custom_config1>,
+                       params1<int, 10, 0, 10, int, int, rocprim::default_config, true>>;
 
 TYPED_TEST_SUITE(RocprimDeviceHistogramEven, Params1);
 
@@ -395,7 +395,7 @@ public:
 
 using custom_config2 = rocprim::histogram_config<rocprim::kernel_config<256, 2>>;
 
-typedef ::testing::Types<
+using Params2 = ::testing::Types<
     params2<int, 10, 0, 1, 10>,
     params2<unsigned char, 5, 10, 10, 20>,
     params2<unsigned int, 10000, 0, 1, 100, unsigned int, unsigned long long, custom_config2>,
@@ -404,8 +404,7 @@ typedef ::testing::Types<
 
     params2<float, 456, -100, 1, 123>,
     params2<double, 3, 10000, 1000, 1000, double, unsigned int>,
-    params2<int, 10, 0, 1, 10, int, int, rocprim::default_config, true>>
-    Params2;
+    params2<int, 10, 0, 1, 10, int, int, rocprim::default_config, true>>;
 
 TYPED_TEST_SUITE(RocprimDeviceHistogramRange, Params2);
 
@@ -644,7 +643,7 @@ public:
 
 using custom_config3 = rocprim::histogram_config<rocprim::kernel_config<192, 1>>;
 
-typedef ::testing::Types<
+using Params3 = ::testing::Types<
     params3<int, 4, 3, 2000, 0, 2000>,
     params3<int, 2, 1, 10, 0, 10, int, int, custom_config3>,
     params3<int, 3, 3, 128, 0, 256>,
@@ -656,8 +655,7 @@ typedef ::testing::Types<
     params3<double, 4, 2, 10, 0, 1000, double, int>,
     params3<int, 3, 2, 123, 100, 5635, int>,
     params3<double, 4, 3, 55, -123, +123, double, unsigned long long, custom_config3>,
-    params3<int, 4, 3, 2000, 0, 2000, int, int, rocprim::default_config, true>>
-    Params3;
+    params3<int, 4, 3, 2000, 0, 2000, int, int, rocprim::default_config, true>>;
 
 TYPED_TEST_SUITE(RocprimDeviceHistogramMultiEven, Params3);
 
@@ -931,7 +929,7 @@ public:
 
 using custom_config4 = rocprim::histogram_config<rocprim::kernel_config<256, 7>>;
 
-typedef ::testing::Types<
+using Params4 = ::testing::Types<
     params4<int, 4, 3, 10, 0, 1, 10>,
     params4<unsigned char, 2, 2, 5, 10, 10, 20>,
     params4<unsigned int, 1, 1, 10000, 0, 1, 100>,
@@ -940,8 +938,7 @@ typedef ::testing::Types<
 
     params4<float, 4, 2, 456, -100, 1, 123, float, int, custom_config4>,
     params4<double, 3, 1, 3, 10000, 1000, 1000, double, unsigned int>,
-    params4<int, 3, 2, 10, 0, 1, 10, int, int, rocprim::default_config, true>>
-    Params4;
+    params4<int, 3, 2, 10, 0, 1, 10, int, int, rocprim::default_config, true>>;
 
 TYPED_TEST_SUITE(RocprimDeviceHistogramMultiRange, Params4);
 
