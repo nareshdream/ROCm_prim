@@ -74,6 +74,13 @@ function(add_rocprim_test_internal TEST_NAME TEST_SOURCES TEST_TARGET)
       $<$<COMPILE_LANGUAGE:HIP>:$<$<HIP_COMPILER_ID:MSVC>:/bigobj>>
   )
 
+  if(WIN32)
+    # Usage of 128-bit integral types (__int128_t and __uint128_t, whose alignment is 16 bytes)
+    # requires an extended alignment support. Otherwise, a static assert will be triggered in
+    # functions like std::stable_sort. _ENABLE_EXTENDED_ALIGNED_STORAGE turns it on:
+    target_compile_definitions(${TEST_TARGET} PRIVATE _ENABLE_EXTENDED_ALIGNED_STORAGE)
+  endif()
+
   set_target_properties(${TEST_TARGET}
     PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test/rocprim"
