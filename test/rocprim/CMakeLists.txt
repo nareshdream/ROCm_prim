@@ -379,27 +379,10 @@ if(NOT WIN32)
   )
 
   # Check what symbols are exported by the libraries and what their names are
+  # nm --demangle --defined-only --extern-only <library> is used to print
+  # the symbols that are exported from a library.
 
   set(NM_ARGS --demangle --defined-only --extern-only)
-
-  add_custom_command(
-    TARGET test_linking_lib1
-    POST_BUILD
-    COMMAND ${CMAKE_NM} ${NM_ARGS} $<TARGET_FILE:test_linking_lib1> | grep "rocprim::"
-    COMMENT "Printing external symbols of test_linking_lib1"
-  )
-  add_custom_command(
-    TARGET test_linking_lib2
-    POST_BUILD
-    COMMAND ${CMAKE_NM} ${NM_ARGS} $<TARGET_FILE:test_linking_lib2> | grep "rocprim::"
-    COMMENT "Printing external symbols of test_linking_lib2"
-  )
-  add_custom_command(
-    TARGET test_linking
-    POST_BUILD
-    COMMAND ${CMAKE_NM} ${NM_ARGS} $<TARGET_FILE:test_linking> | grep "rocprim::"
-    COMMENT "Printing external symbols of test_linking"
-  )
 
   # The tests fail if
   #  * there are symbols in the rocprim namespace but not in the inline namespace with the
