@@ -336,8 +336,14 @@ TYPED_TEST(DeviceMergeInplaceTests, MergeInplace)
         std::vector<value_type> h_data(size_total);
 
         size_t total_bytes  = sizeof(value_type) * size_total;
-        size_t storage_size = 0;
 
+        // Limit the total size to slightly saner numbers.
+        if(total_bytes >= 1LL << 35 /* 32 GiB */)
+        {
+            continue;
+        }
+
+        size_t storage_size = 0;
         HIP_CHECK(rocprim::merge_inplace(nullptr,
                                          storage_size,
                                          static_cast<value_type*>(nullptr),
