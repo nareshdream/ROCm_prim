@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2017-2024 Advanced Micro Devices, Inc. All rights reserved.
+# Copyright (c) 2017-2025 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -341,12 +341,15 @@ if(NOT WIN32)
   endif()
 
   add_library(test_linking_lib1 SHARED test_linking_lib.cpp)
+  if(ROCPRIM_INSTALL)
+    rocm_install(TARGETS test_linking_lib1 COMPONENT tests)
+  endif()
   target_include_directories(test_linking_lib1 SYSTEM BEFORE
-    PUBLIC
+    PRIVATE
       $<BUILD_INTERFACE:${COMMON_TEST_HEADER_DIRECTORY}>
       $<TARGET_PROPERTY:GTest::GTest,INTERFACE_INCLUDE_DIRECTORIES>
   )
-  target_link_libraries(test_linking_lib1 PUBLIC rocprim_hip)
+  target_link_libraries(test_linking_lib1 PRIVATE rocprim_hip)
   set_target_properties(test_linking_lib1
     PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test/rocprim"
@@ -354,12 +357,15 @@ if(NOT WIN32)
   )
 
   add_library(test_linking_lib2 SHARED test_linking_lib.cpp)
+  if(ROCPRIM_INSTALL)
+    rocm_install(TARGETS test_linking_lib2 COMPONENT tests)
+  endif()
   target_include_directories(test_linking_lib2 SYSTEM BEFORE
-    PUBLIC
+    PRIVATE
       $<BUILD_INTERFACE:${COMMON_TEST_HEADER_DIRECTORY}>
       $<TARGET_PROPERTY:GTest::GTest,INTERFACE_INCLUDE_DIRECTORIES>
   )
-  target_link_libraries(test_linking_lib2 PUBLIC rocprim_hip)
+  target_link_libraries(test_linking_lib2 PRIVATE rocprim_hip)
   # Pretend that we build this library with another version of rocPRIM which uses another
   # implementation of scan
   if(NOT WITHOUT_INLINE_NAMESPACE)
