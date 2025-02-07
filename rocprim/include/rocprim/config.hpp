@@ -105,7 +105,7 @@
 #undef ROCPRIM_TARGET_CDNA3
 
 // See https://llvm.org/docs/AMDGPUUsage.html#instructions
-#if defined(__gfx940__) || defined(__gfx941__) || defined(__gfx942__)
+#if defined(__gfx942__)
     #define ROCPRIM_TARGET_CDNA3 1
 #elif defined(__gfx90a__)
     #define ROCPRIM_TARGET_CDNA2 1
