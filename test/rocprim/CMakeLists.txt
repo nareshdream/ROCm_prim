@@ -342,7 +342,8 @@ if(NOT WIN32)
 
   add_library(test_linking_lib1 SHARED test_linking_lib.cpp)
   if(ROCPRIM_INSTALL)
-    rocm_install(TARGETS test_linking_lib1 COMPONENT tests)
+    # Use a dummy export file to avoid adding the library to rocprim-targets.cmake
+    rocm_install(TARGETS test_linking_lib1 COMPONENT tests EXPORT rocprim-tests)
   endif()
   target_include_directories(test_linking_lib1 SYSTEM BEFORE
     PRIVATE
@@ -358,7 +359,8 @@ if(NOT WIN32)
 
   add_library(test_linking_lib2 SHARED test_linking_lib.cpp)
   if(ROCPRIM_INSTALL)
-    rocm_install(TARGETS test_linking_lib2 COMPONENT tests)
+    # Use a dummy export file to avoid adding the library to rocprim-targets.cmake
+    rocm_install(TARGETS test_linking_lib2 COMPONENT tests EXPORT rocprim-tests)
   endif()
   target_include_directories(test_linking_lib2 SYSTEM BEFORE
     PRIVATE
