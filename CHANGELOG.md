@@ -29,6 +29,19 @@ Full documentation for rocPRIM is available at [https://rocm.docs.amd.com/projec
 ### Deprecations
 
 * `rocprim::load_cs` and `rocprim::store_cs` are deprecated. Use `rocprim::load_nontemporal` and `rocprim::store_nontemporal` now.
+* Beginning with the next major release, the default scan accumulator types for device-level scan algorithms will be changed as described below. Please note that this will be a breaking change. Currently, the default accumulator type is set to the input type for inclusive scans, and to the initial value type for exclusive scans. These default types can cause unexpected overflow in situations where the input or initial type is smaller than the output type (if users do not explicitly set an accumulator type using the `AccType` template parameter). The new default types will be set to the type that results when the input or initial value type is applied to the scan operator. Here is a full list of the affected functions and how their default accumulator types will change:
+  * `rocprim::inclusive_scan`
+    * current default: `class AccType = typename std::iterator_traits<InputIterator>::value_type>`
+    * future default: `class AccType = rocprim::invoke_result_binary_op_t<typename std::iterator_traits<InputIterator>::value_type, BinaryFunction>`
+  * `rocprim::deterministic_inclusive_scan`
+    * current default: `class AccType = typename std::iterator_traits<InputIterator>::value_type>`
+    * future default: `class AccType = rocprim::invoke_result_binary_op_t<typename std::iterator_traits<InputIterator>::value_type, BinaryFunction>`
+  * `rocprim::exclusive_scan`
+    * current default: `class AccType = detail::input_type_t<InitValueType>>`
+    * future default: `class AccType = rocprim::invoke_result_binary_op_t<rocprim::detail::input_type_t<InitValueType>, BinaryFunction>`
+  * `rocprim::deterministic_exclusive_scan`
+    * current default: `class AccType = detail::input_type_t<InitValueType>>`
+    * future default: `class AccType = rocprim::invoke_result_binary_op_t<rocprim::detail::input_type_t<InitValueType>, BinaryFunction>`
 
 ## rocPRIM 3.4.0 for ROCm 6.4.0
 
